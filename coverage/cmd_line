@@ -1,0 +1,1 @@
+genhtml coverage/test.info -o coverage --no-function-coverage --prefix /Users/understd/Documents/Projects/Exercise/Dicoding/a199-flutter-expert-project
