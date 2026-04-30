@@ -1,13 +1,13 @@
 import 'package:dartz/dartz.dart';
+import 'package:ditonton/common/failure.dart';
+import 'package:ditonton/common/state_enum.dart';
 import 'package:ditonton/domain/entities/movie.dart';
 import 'package:ditonton/domain/usecases/get_movie_detail.dart';
 import 'package:ditonton/domain/usecases/get_movie_recommendations.dart';
-import 'package:ditonton/common/failure.dart';
 import 'package:ditonton/domain/usecases/get_watchlist_status.dart';
 import 'package:ditonton/domain/usecases/remove_watchlist.dart';
 import 'package:ditonton/domain/usecases/save_watchlist.dart';
 import 'package:ditonton/presentation/provider/movie_detail_notifier.dart';
-import 'package:ditonton/common/state_enum.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
@@ -168,7 +168,7 @@ void main() {
     test('should execute save watchlist when function called', () async {
       // arrange
       when(mockSaveWatchlist.execute(testMovieDetail))
-          .thenAnswer((_) async => Right('Success'));
+          .thenAnswer((_) async => const Right('Success'));
       when(mockGetWatchlistStatus.execute(testMovieDetail.id))
           .thenAnswer((_) async => true);
       // act
@@ -180,7 +180,7 @@ void main() {
     test('should execute remove watchlist when function called', () async {
       // arrange
       when(mockRemoveWatchlist.execute(testMovieDetail))
-          .thenAnswer((_) async => Right('Removed'));
+          .thenAnswer((_) async => const Right('Removed'));
       when(mockGetWatchlistStatus.execute(testMovieDetail.id))
           .thenAnswer((_) async => false);
       // act
@@ -192,7 +192,7 @@ void main() {
     test('should update watchlist status when add watchlist success', () async {
       // arrange
       when(mockSaveWatchlist.execute(testMovieDetail))
-          .thenAnswer((_) async => Right('Added to Watchlist'));
+          .thenAnswer((_) async => const Right('Added to Watchlist'));
       when(mockGetWatchlistStatus.execute(testMovieDetail.id))
           .thenAnswer((_) async => true);
       // act

@@ -57,7 +57,7 @@ void main() {
     when(mockNotifier.state).thenReturn(RequestState.Error);
     when(mockNotifier.message).thenReturn('Error message');
 
-    final textFinder = find.byKey(Key('error_message'));
+    final textFinder = find.byKey(const Key('error_message'));
 
     await tester.pumpWidget(_makeTestableWidget(PopularMoviesPage()));
 

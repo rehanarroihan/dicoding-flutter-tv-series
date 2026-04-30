@@ -15,23 +15,24 @@ class _PopularMoviesPageState extends State<PopularMoviesPage> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() =>
-        Provider.of<PopularMoviesNotifier>(context, listen: false)
-            .fetchPopularMovies());
+    Future.microtask(
+      () => Provider.of<PopularMoviesNotifier>(context, listen: false)
+          .fetchPopularMovies(),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Popular Movies'),
+        title: const Text('Popular Movies'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Consumer<PopularMoviesNotifier>(
           builder: (context, data, child) {
             if (data.state == RequestState.Loading) {
-              return Center(
+              return const Center(
                 child: CircularProgressIndicator(),
               );
             } else if (data.state == RequestState.Loaded) {
@@ -44,7 +45,7 @@ class _PopularMoviesPageState extends State<PopularMoviesPage> {
               );
             } else {
               return Center(
-                key: Key('error_message'),
+                key: const Key('error_message'),
                 child: Text(data.message),
               );
             }
