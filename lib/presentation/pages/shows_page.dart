@@ -1,5 +1,7 @@
 import 'package:ditonton/common/constants.dart';
-import 'package:ditonton/common/state_enum.dart';
+import 'package:ditonton/presentation/bloc/show/on_the_air/on_the_air_shows_bloc.dart';
+import 'package:ditonton/presentation/bloc/show/popular/popular_shows_bloc.dart';
+import 'package:ditonton/presentation/bloc/show/top_rated/top_rated_shows_bloc.dart';
 import 'package:ditonton/presentation/pages/about_page.dart';
 import 'package:ditonton/presentation/pages/home_movie_page.dart';
 import 'package:ditonton/presentation/pages/on_the_air_shows_page.dart';
@@ -7,12 +9,9 @@ import 'package:ditonton/presentation/pages/popular_shows_page.dart';
 import 'package:ditonton/presentation/pages/search_page.dart';
 import 'package:ditonton/presentation/pages/top_rated_shows_page.dart';
 import 'package:ditonton/presentation/pages/watchlist_movies_page.dart';
-import 'package:ditonton/presentation/provider/on_the_air_shows_notifier.dart';
-import 'package:ditonton/presentation/provider/popular_shows_notifier.dart';
-import 'package:ditonton/presentation/provider/top_rated_shows_notifier.dart';
 import 'package:ditonton/presentation/widgets/show_list.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class ShowsPage extends StatefulWidget {
   static const routeName = '/shows';
@@ -28,11 +27,9 @@ class _ShowsPageState extends State<ShowsPage> {
   void initState() {
     super.initState();
     Future.microtask(() {
-      Provider.of<PopularShowsNotifier>(context, listen: false)
-          .loadPopularShows();
-      Provider.of<OnTheAirShowsNotifier>(context, listen: false).fetchShows();
-      Provider.of<TopRatedShowsNotifier>(context, listen: false)
-          .fetchTopRated();
+      context.read<OnTheAirShowsBloc>().add(OnFetchOnTheAirShows());
+      context.read<PopularShowsBloc>().add(OnFetchPopularShows());
+      context.read<TopRatedShowsBloc>().add(OnFetchTopRatedShows());
     });
   }
 
@@ -97,12 +94,12 @@ class _ShowsPageState extends State<ShowsPage> {
                 onTap: () =>
                     Navigator.pushNamed(context, OnTheAirShowsPage.routeName),
               ),
-              Consumer<OnTheAirShowsNotifier>(
-                builder: (context, data, child) {
-                  if (data.status == RequestState.Loading) {
+              BlocBuilder<OnTheAirShowsBloc, OnTheAirShowsState>(
+                builder: (context, state) {
+                  if (state is OnTheAirShowsLoading) {
                     return const Center(child: CircularProgressIndicator());
-                  } else if (data.status == RequestState.Loaded) {
-                    return ShowList(data.showList);
+                  } else if (state is OnTheAirShowsHasData) {
+                    return ShowList(state.result);
                   } else {
                     return const Text('Failed to load');
                   }
@@ -113,12 +110,12 @@ class _ShowsPageState extends State<ShowsPage> {
                 onTap: () =>
                     Navigator.pushNamed(context, PopularShowsPage.routeName),
               ),
-              Consumer<PopularShowsNotifier>(
-                builder: (context, data, child) {
-                  if (data.reqState == RequestState.Loading) {
+              BlocBuilder<PopularShowsBloc, PopularShowsState>(
+                builder: (context, state) {
+                  if (state is PopularShowsLoading) {
                     return const Center(child: CircularProgressIndicator());
-                  } else if (data.reqState == RequestState.Loaded) {
-                    return ShowList(data.items);
+                  } else if (state is PopularShowsHasData) {
+                    return ShowList(state.result);
                   } else {
                     return const Text('Failed to load');
                   }
@@ -129,12 +126,12 @@ class _ShowsPageState extends State<ShowsPage> {
                 onTap: () =>
                     Navigator.pushNamed(context, TopRatedShowsPage.routeName),
               ),
-              Consumer<TopRatedShowsNotifier>(
-                builder: (context, data, child) {
-                  if (data.state == RequestState.Loading) {
+              BlocBuilder<TopRatedShowsBloc, TopRatedShowsState>(
+                builder: (context, state) {
+                  if (state is TopRatedShowsLoading) {
                     return const Center(child: CircularProgressIndicator());
-                  } else if (data.state == RequestState.Loaded) {
-                    return ShowList(data.list);
+                  } else if (state is TopRatedShowsHasData) {
+                    return ShowList(state.result);
                   } else {
                     return const Text('Failed to load');
                   }

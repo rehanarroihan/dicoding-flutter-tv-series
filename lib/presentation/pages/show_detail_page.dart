@@ -1,13 +1,12 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:ditonton/common/constants.dart';
-import 'package:ditonton/common/state_enum.dart';
 import 'package:ditonton/domain/entities/genre.dart';
 import 'package:ditonton/domain/entities/tv_show.dart';
 import 'package:ditonton/domain/entities/tv_show_detail.dart';
-import 'package:ditonton/presentation/provider/show_detail_notifier.dart';
+import 'package:ditonton/presentation/bloc/show/detail/show_detail_bloc.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
-import 'package:provider/provider.dart';
 
 class ShowDetailPage extends StatefulWidget {
   static const routeName = '/detail-show';
@@ -24,30 +23,30 @@ class _ShowDetailPageState extends State<ShowDetailPage> {
   void initState() {
     super.initState();
     Future.microtask(() {
-      Provider.of<ShowDetailNotifier>(context, listen: false)
-          .fetchDetail(widget.id);
-      Provider.of<ShowDetailNotifier>(context, listen: false)
-          .refreshWatchlistStatus(widget.id);
+      context.read<ShowDetailBloc>().add(OnFetchShowDetail(widget.id));
+      context.read<ShowDetailBloc>().add(OnLoadShowWatchlistStatus(widget.id));
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Consumer<ShowDetailNotifier>(
-        builder: (context, provider, child) {
-          if (provider.itemStatus == RequestState.Loading) {
+      body: BlocBuilder<ShowDetailBloc, ShowDetailState>(
+        builder: (context, state) {
+          if (state.showDetailState == ShowDataState.loading) {
             return const Center(child: CircularProgressIndicator());
-          } else if (provider.itemStatus == RequestState.Loaded) {
+          } else if (state.showDetailState == ShowDataState.loaded) {
             return SafeArea(
               child: ShowDetailContent(
-                provider.item,
-                provider.recs,
-                provider.inWatchlist,
+                state.showDetail!,
+                state.showRecommendations,
+                state.isAddedToWatchlist,
               ),
             );
+          } else if (state.showDetailState == ShowDataState.error) {
+            return Center(child: Text(state.message));
           } else {
-            return Center(child: Text(provider.msg));
+            return const Center(child: Text('Empty'));
           }
         },
       ),
@@ -96,20 +95,19 @@ class ShowDetailContent extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(show.name, style: kHeading5),
-                            ElevatedButton(
-                              onPressed: () async {
-                                final notifier =
-                                    Provider.of<ShowDetailNotifier>(context,
-                                        listen: false);
-                                if (!isInWatchlist) {
-                                  await notifier.addToWatchlist(show);
-                                } else {
-                                  await notifier.removeFromWatchlist(show);
-                                }
-
-                                final message = notifier.watchMsg;
-                                if (message == ShowDetailNotifier.addMsg ||
-                                    message == ShowDetailNotifier.removeMsg) {
+                            BlocListener<ShowDetailBloc, ShowDetailState>(
+                              listenWhen: (previous, current) =>
+                                  current.watchlistMessage !=
+                                      previous.watchlistMessage &&
+                                  current.watchlistMessage != '',
+                              listener: (context, state) {
+                                final message = state.watchlistMessage;
+                                if (message ==
+                                        ShowDetailBloc
+                                            .watchlistAddSuccessMessage ||
+                                    message ==
+                                        ShowDetailBloc
+                                            .watchlistRemoveSuccessMessage) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(content: Text(message)));
                                 } else {
@@ -120,14 +118,27 @@ class ShowDetailContent extends StatelessWidget {
                                   );
                                 }
                               },
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  isInWatchlist
-                                      ? const Icon(Icons.check)
-                                      : const Icon(Icons.add),
-                                  const Text('Watchlist'),
-                                ],
+                              child: ElevatedButton(
+                                onPressed: () async {
+                                  if (!isInWatchlist) {
+                                    context
+                                        .read<ShowDetailBloc>()
+                                        .add(OnAddShowWatchlist(show));
+                                  } else {
+                                    context
+                                        .read<ShowDetailBloc>()
+                                        .add(OnRemoveShowFromWatchlist(show));
+                                  }
+                                },
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    isInWatchlist
+                                        ? const Icon(Icons.check)
+                                        : const Icon(Icons.add),
+                                    const Text('Watchlist'),
+                                  ],
+                                ),
                               ),
                             ),
                             Text(_formatGenres(show.genres)),
@@ -187,34 +198,48 @@ class ShowDetailContent extends StatelessWidget {
   }
 
   Widget _buildRecommendationList() {
-    return Container(
-      height: 150,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemBuilder: (context, index) {
-          final item = recommendations[index];
-          return Padding(
-            padding: const EdgeInsets.all(4.0),
-            child: InkWell(
-              onTap: () {
-                Navigator.pushReplacementNamed(
-                    context, ShowDetailPage.routeName,
-                    arguments: item.id);
+    return BlocBuilder<ShowDetailBloc, ShowDetailState>(
+      builder: (context, state) {
+        if (state.showRecommendationsState == ShowDataState.loading) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (state.showRecommendationsState == ShowDataState.error) {
+          return Text(state.message);
+        } else if (state.showRecommendationsState == ShowDataState.loaded) {
+          return Container(
+            height: 150,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemBuilder: (context, index) {
+                final item = recommendations[index];
+                return Padding(
+                  padding: const EdgeInsets.all(4.0),
+                  child: InkWell(
+                    onTap: () {
+                      Navigator.pushReplacementNamed(
+                          context, ShowDetailPage.routeName,
+                          arguments: item.id);
+                    },
+                    child: ClipRRect(
+                      borderRadius: const BorderRadius.all(Radius.circular(8)),
+                      child: CachedNetworkImage(
+                        imageUrl:
+                            'https://image.tmdb.org/t/p/w500${item.posterPath}',
+                        placeholder: (context, url) =>
+                            const Center(child: CircularProgressIndicator()),
+                        errorWidget: (context, url, error) =>
+                            const Icon(Icons.error),
+                      ),
+                    ),
+                  ),
+                );
               },
-              child: ClipRRect(
-                borderRadius: const BorderRadius.all(Radius.circular(8)),
-                child: CachedNetworkImage(
-                  imageUrl: 'https://image.tmdb.org/t/p/w500${item.posterPath}',
-                  placeholder: (context, url) =>
-                      const Center(child: CircularProgressIndicator()),
-                  errorWidget: (context, url, error) => const Icon(Icons.error),
-                ),
-              ),
+              itemCount: recommendations.length,
             ),
           );
-        },
-        itemCount: recommendations.length,
-      ),
+        } else {
+          return Container();
+        }
+      },
     );
   }
 }

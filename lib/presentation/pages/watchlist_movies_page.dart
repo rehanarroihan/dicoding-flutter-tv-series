@@ -1,12 +1,11 @@
 import 'package:ditonton/common/constants.dart';
-import 'package:ditonton/common/state_enum.dart';
 import 'package:ditonton/common/utils.dart';
-import 'package:ditonton/presentation/provider/watchlist_movie_notifier.dart';
-import 'package:ditonton/presentation/provider/watchlist_shows_notifier.dart';
+import 'package:ditonton/presentation/bloc/movie/watchlist/watchlist_movie_bloc.dart';
+import 'package:ditonton/presentation/bloc/show/watchlist/watchlist_shows_bloc.dart';
 import 'package:ditonton/presentation/widgets/movie_card_list.dart';
 import 'package:ditonton/presentation/widgets/show_card.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class WatchlistMoviesPage extends StatefulWidget {
   static const ROUTE_NAME = '/watchlist-movie';
@@ -21,10 +20,8 @@ class _WatchlistMoviesPageState extends State<WatchlistMoviesPage>
   void initState() {
     super.initState();
     Future.microtask(() {
-      Provider.of<WatchlistMovieNotifier>(context, listen: false)
-          .fetchWatchlistMovies();
-      Provider.of<WatchlistShowsNotifier>(context, listen: false)
-          .loadWatchlist();
+      context.read<WatchlistMovieBloc>().add(OnFetchWatchlistMovies());
+      context.read<WatchlistShowsBloc>().add(OnFetchWatchlistShows());
     });
   }
 
@@ -34,10 +31,10 @@ class _WatchlistMoviesPageState extends State<WatchlistMoviesPage>
     routeObserver.subscribe(this, ModalRoute.of(context)!);
   }
 
+  @override
   void didPopNext() {
-    Provider.of<WatchlistMovieNotifier>(context, listen: false)
-        .fetchWatchlistMovies();
-    Provider.of<WatchlistShowsNotifier>(context, listen: false).loadWatchlist();
+    context.read<WatchlistMovieBloc>().add(OnFetchWatchlistMovies());
+    context.read<WatchlistShowsBloc>().add(OnFetchWatchlistShows());
   }
 
   @override
@@ -53,47 +50,52 @@ class _WatchlistMoviesPageState extends State<WatchlistMoviesPage>
             children: [
               Text('Movies', style: kHeading6),
               const SizedBox(height: 8.0),
-              Consumer<WatchlistMovieNotifier>(
-                builder: (context, data, child) {
-                  if (data.watchlistState == RequestState.Loading) {
+              BlocBuilder<WatchlistMovieBloc, WatchlistMovieState>(
+                builder: (context, state) {
+                  if (state is WatchlistMovieLoading) {
                     return const Center(child: CircularProgressIndicator());
-                  } else if (data.watchlistState == RequestState.Loaded) {
-                    return data.watchlistMovies.isEmpty
+                  } else if (state is WatchlistMovieHasData) {
+                    return state.result.isEmpty
                         ? const Text('Empty')
                         : ListView.builder(
                             physics: const NeverScrollableScrollPhysics(),
                             shrinkWrap: true,
                             itemBuilder: (context, index) =>
-                                MovieCard(data.watchlistMovies[index]),
-                            itemCount: data.watchlistMovies.length,
+                                MovieCard(state.result[index]),
+                            itemCount: state.result.length,
                           );
-                  } else {
+                  } else if (state is WatchlistMovieError) {
                     return Center(
                         key: const Key('error_message'),
-                        child: Text(data.message));
+                        child: Text(state.message));
+                  } else {
+                    return const Text('Empty');
                   }
                 },
               ),
               const SizedBox(height: 8.0),
               Text('TV Shows', style: kHeading6),
               const SizedBox(height: 8.0),
-              Consumer<WatchlistShowsNotifier>(
-                builder: (context, data, child) {
-                  if (data.watchlistState == RequestState.Loading) {
+              BlocBuilder<WatchlistShowsBloc, WatchlistShowsState>(
+                builder: (context, state) {
+                  if (state is WatchlistShowsLoading) {
                     return const Center(child: CircularProgressIndicator());
-                  } else if (data.watchlistState == RequestState.Loaded) {
-                    return data.watchlistItems.isEmpty
+                  } else if (state is WatchlistShowsHasData) {
+                    return state.result.isEmpty
                         ? const Text('Empty')
                         : ListView.builder(
                             physics: const NeverScrollableScrollPhysics(),
                             shrinkWrap: true,
                             itemBuilder: (context, index) =>
-                                ShowCard(data.watchlistItems[index]),
-                            itemCount: data.watchlistItems.length,
+                                ShowCard(state.result[index]),
+                            itemCount: state.result.length,
                           );
-                  } else {
+                  } else if (state is WatchlistShowsError) {
                     return Center(
-                        key: const Key('error_message'), child: Text(data.err));
+                        key: const Key('error_message'),
+                        child: Text(state.message));
+                  } else {
+                    return const Text('Empty');
                   }
                 },
               ),

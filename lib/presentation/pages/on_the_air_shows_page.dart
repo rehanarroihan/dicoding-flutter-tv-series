@@ -1,8 +1,7 @@
-import 'package:ditonton/common/state_enum.dart';
-import 'package:ditonton/presentation/provider/on_the_air_shows_notifier.dart';
+import 'package:ditonton/presentation/bloc/show/on_the_air/on_the_air_shows_bloc.dart';
 import 'package:ditonton/presentation/widgets/show_card.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class OnTheAirShowsPage extends StatefulWidget {
   static const routeName = '/on-the-air-shows';
@@ -18,7 +17,7 @@ class _OnTheAirShowsPageState extends State<OnTheAirShowsPage> {
   void initState() {
     super.initState();
     Future.microtask(() {
-      Provider.of<OnTheAirShowsNotifier>(context, listen: false).fetchShows();
+      context.read<OnTheAirShowsBloc>().add(OnFetchOnTheAirShows());
     });
   }
 
@@ -28,18 +27,20 @@ class _OnTheAirShowsPageState extends State<OnTheAirShowsPage> {
       appBar: AppBar(title: const Text('Currently Airing')),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: Consumer<OnTheAirShowsNotifier>(
-          builder: (context, data, child) {
-            if (data.status == RequestState.Loading) {
+        child: BlocBuilder<OnTheAirShowsBloc, OnTheAirShowsState>(
+          builder: (context, state) {
+            if (state is OnTheAirShowsLoading) {
               return const Center(child: CircularProgressIndicator());
-            } else if (data.status == RequestState.Loaded) {
+            } else if (state is OnTheAirShowsHasData) {
               return ListView.builder(
-                itemBuilder: (context, index) => ShowCard(data.showList[index]),
-                itemCount: data.showList.length,
+                itemBuilder: (context, index) => ShowCard(state.result[index]),
+                itemCount: state.result.length,
               );
-            } else {
+            } else if (state is OnTheAirShowsError) {
               return Center(
-                  child: Text(data.msg, key: const Key('error_message')));
+                  child: Text(state.message, key: const Key('error_message')));
+            } else {
+              return const Center(child: Text('Empty'));
             }
           },
         ),
