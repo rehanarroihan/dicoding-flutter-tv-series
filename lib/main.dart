@@ -1,33 +1,11 @@
-import 'package:ditonton/common/constants.dart';
-import 'package:ditonton/common/utils.dart';
+import 'package:about/about.dart';
+import 'package:core/core.dart';
 import 'package:ditonton/injection.dart' as di;
-import 'package:ditonton/presentation/bloc/movie/detail/movie_detail_bloc.dart';
-import 'package:ditonton/presentation/bloc/movie/now_playing/now_playing_movies_bloc.dart';
-import 'package:ditonton/presentation/bloc/movie/popular/popular_movies_bloc.dart';
-import 'package:ditonton/presentation/bloc/movie/search/movie_search_bloc.dart';
-import 'package:ditonton/presentation/bloc/movie/top_rated/top_rated_movies_bloc.dart';
-import 'package:ditonton/presentation/bloc/movie/watchlist/watchlist_movie_bloc.dart';
-import 'package:ditonton/presentation/bloc/show/detail/show_detail_bloc.dart';
-import 'package:ditonton/presentation/bloc/show/on_the_air/on_the_air_shows_bloc.dart';
-import 'package:ditonton/presentation/bloc/show/popular/popular_shows_bloc.dart';
-import 'package:ditonton/presentation/bloc/show/search/show_search_bloc.dart';
-import 'package:ditonton/presentation/bloc/show/top_rated/top_rated_shows_bloc.dart';
-import 'package:ditonton/presentation/bloc/show/watchlist/watchlist_shows_bloc.dart';
-import 'package:ditonton/presentation/pages/about_page.dart';
-import 'package:ditonton/presentation/pages/home_movie_page.dart';
-import 'package:ditonton/presentation/pages/movie_detail_page.dart';
-import 'package:ditonton/presentation/pages/on_the_air_shows_page.dart';
-import 'package:ditonton/presentation/pages/popular_movies_page.dart';
-import 'package:ditonton/presentation/pages/popular_shows_page.dart';
-import 'package:ditonton/presentation/pages/search_page.dart';
-import 'package:ditonton/presentation/pages/show_detail_page.dart';
-import 'package:ditonton/presentation/pages/shows_page.dart';
-import 'package:ditonton/presentation/pages/top_rated_movies_page.dart';
-import 'package:ditonton/presentation/pages/top_rated_shows_page.dart';
-import 'package:ditonton/presentation/pages/watchlist_movies_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:movie/movie.dart';
+import 'package:tv/tv.dart';
 
 void main() {
   di.init();
@@ -97,13 +75,16 @@ class MyApp extends StatelessWidget {
               );
             case PopularShowsPage.routeName:
               return CupertinoPageRoute(
-                  builder: (_) => const PopularShowsPage());
+                builder: (_) => const PopularShowsPage(),
+              );
             case OnTheAirShowsPage.routeName:
               return CupertinoPageRoute(
-                  builder: (_) => const OnTheAirShowsPage());
+                builder: (_) => const OnTheAirShowsPage(),
+              );
             case TopRatedShowsPage.routeName:
               return CupertinoPageRoute(
-                  builder: (_) => const TopRatedShowsPage());
+                builder: (_) => const TopRatedShowsPage(),
+              );
             default:
               return MaterialPageRoute(
                 builder: (_) {

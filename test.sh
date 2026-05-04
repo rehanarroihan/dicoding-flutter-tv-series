@@ -21,14 +21,24 @@ where:
 runTests() {
   cd $1
   if [ -f "pubspec.yaml" ] && [ -d "test" ]; then
-    echo "running tests in $1"
+    echo "---------------------------------------"
+    echo "Running tests in $1"
+    echo "---------------------------------------"
     flutter pub get
 
-    escapedPath="$(echo $1 | sed 's/\//\\\//g')"
+    # Remove ./ prefix for path mapping
+    cleanPath=$(echo $1 | sed 's/^\.\///')
+    if [ "$cleanPath" == "." ]; then
+        prefix=""
+    else
+        prefix="$cleanPath/"
+    fi
+    
+    escapedPrefix=$(echo $prefix | sed 's/\//\\\//g')
 
     # run tests with coverage
     if grep flutter pubspec.yaml >/dev/null; then
-      echo "run flutter tests"
+      echo "Executing flutter tests..."
       if [ -f "test/all_tests.dart" ]; then
         flutter test --coverage test/all_tests.dart || error=true
       else
@@ -36,12 +46,16 @@ runTests() {
       fi
 
       if [ -d "coverage" ]; then
+        # Ensure root coverage directory exists
+        mkdir -p $2/coverage
         # combine line coverage info from package tests to a common file
-        sed "s/^SF:lib/SF:$escapedPath\/lib/g" coverage/lcov.info >>$2/coverage/test.info
+        # SF:lib/path/to/file.dart -> SF:module/lib/path/to/file.dart
+        sed "s/^SF:lib/SF:${escapedPrefix}lib/g" coverage/lcov.info >>$2/coverage/test.info
         rm -f coverage/lcov.info
       fi
     else
-      echo "not a flutter package, skipping"
+      echo "Not a flutter package, skipping coverage"
+      flutter test || error=true
     fi
   fi
   cd - >/dev/null
@@ -49,12 +63,19 @@ runTests() {
 
 runReport() {
   if [ -f "coverage/test.info" ] && ! [ "$TRAVIS" ]; then
-    genhtml coverage/test.info -o coverage --no-function-coverage --prefix $(pwd)
+    if command -v genhtml >/dev/null; then
+      echo "---------------------------------------"
+      echo "Generating combined coverage report..."
+      echo "---------------------------------------"
+      genhtml coverage/test.info -o coverage --no-function-coverage --prefix $(pwd)
 
-    if [ "$(uname)" == "Darwin" ]; then
-      open coverage/index.html
+      if [ "$(uname)" == "Darwin" ]; then
+        open coverage/index.html
+      else
+        echo "Report generated at coverage/index.html"
+      fi
     else
-      start coverage/index.html
+      echo "lcov (genhtml) not installed. Skipping HTML report generation."
     fi
   fi
 }
@@ -75,9 +96,14 @@ case $1 in
     if [ -d "coverage" ]; then
       rm -r coverage
     fi
-    dirs=($(find . -maxdepth 2 -type d))
-    for dir in "${dirs[@]}"; do
-      runTests $dir $currentDir
+    
+    # Target specific modules and root
+    modules=("." "core" "movie" "tv" "about")
+    
+    for dir in "${modules[@]}"; do
+      if [ -d "$dir" ]; then
+        runTests $dir $currentDir
+      fi
     done
   else
     if [[ -d "$1" ]]; then
