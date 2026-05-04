@@ -4,10 +4,19 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   final tModel = TvShowModel(
-    id: 1,
-    name: 'name',
-    overview: 'overview',
-    posterPath: 'path',
+    id: 123,
+    name: 'movie_title',
+    overview: 'lorem ipsum 123',
+    posterPath: '/poster_path.jpg',
+    backdropPath: '/img_path.jpg',
+    firstAirDate: '2000-10-10',
+    genreIds: [1, 2],
+    originCountry: ['ID'],
+    originalLanguage: 'id',
+    originalName: 'movie_title',
+    popularity: 144.0,
+    voteAverage: 9.5,
+    voteCount: 123,
   );
 
   final tResponse = TvShowResponse(items: [tModel]);
@@ -18,10 +27,19 @@ void main() {
       final Map<String, dynamic> jsonMap = {
         'results': [
           {
-            'id': 1,
-            'name': 'name',
-            'overview': 'overview',
-            'poster_path': 'path',
+            'backdrop_path': '/img_path.jpg',
+            'first_air_date': '2000-10-10',
+            'genre_ids': [1, 2],
+            'id': 123,
+            'name': 'movie_title',
+            'origin_country': ['ID'],
+            'original_language': 'id',
+            'original_name': 'movie_title',
+            'overview': 'lorem ipsum 123',
+            'popularity': 144.0,
+            'poster_path': '/poster_path.jpg',
+            'vote_average': 9.5,
+            'vote_count': 123,
           }
         ],
       };
@@ -38,19 +56,19 @@ void main() {
       final expectedMap = {
         'results': [
           {
-            'id': 1,
-            'name': 'name',
-            'overview': 'overview',
-            'poster_path': 'path',
-            'backdrop_path': null,
-            'first_air_date': null,
-            'genre_ids': null,
-            'origin_country': null,
-            'original_language': null,
-            'original_name': null,
-            'popularity': null,
-            'vote_average': null,
-            'vote_count': null,
+            'id': 123,
+            'name': 'movie_title',
+            'overview': 'lorem ipsum 123',
+            'poster_path': '/poster_path.jpg',
+            'backdrop_path': '/img_path.jpg',
+            'first_air_date': '2000-10-10',
+            'genre_ids': [1, 2],
+            'origin_country': ['ID'],
+            'original_language': 'id',
+            'original_name': 'movie_title',
+            'popularity': 144.0,
+            'vote_average': 9.5,
+            'vote_count': 123,
           }
         ],
       };

@@ -1,3 +1,5 @@
+import 'package:core/data/models/genre_model.dart';
+import 'package:core/data/models/movie_detail_model.dart';
 import 'package:core/data/models/movie_table.dart';
 import 'package:core/data/models/tv_show_table.dart';
 import 'package:core/domain/entities/genre.dart';
@@ -27,17 +29,46 @@ final testMovieList = [testMovie];
 
 final testMovieDetail = MovieDetail(
   adult: false,
-  backdropPath: 'backdropPath',
-  genres: [Genre(id: 1, name: 'Action')],
-  id: 1,
-  originalTitle: 'originalTitle',
-  overview: 'overview',
-  posterPath: 'posterPath',
-  releaseDate: 'releaseDate',
-  runtime: 120,
-  title: 'title',
-  voteAverage: 1,
-  voteCount: 1,
+  backdropPath: '/muth4OYamXf41G2evdrLEg8d3om.jpg',
+  genres: [Genre(id: 14, name: 'Fantasy'), Genre(id: 28, name: 'Action')],
+  id: 557,
+  originalTitle: 'Spider-Man',
+  overview:
+      'After being bitten by a genetically altered spider, nerdy high school student Peter Parker is endowed with amazing powers to become the Amazing superhero known as Spider-Man.',
+  posterPath: '/rweIrveL43TaxUN0akQEaAXL6x0.jpg',
+  releaseDate: '2002-05-01',
+  runtime: 121,
+  title: 'Spider-Man',
+  voteAverage: 7.2,
+  voteCount: 13507,
+);
+
+final testMovieDetailModel = MovieDetailResponse(
+  adult: false,
+  backdropPath: '/muth4OYamXf41G2evdrLEg8d3om.jpg',
+  budget: 100,
+  genres: [
+    GenreModel(id: 14, name: 'Fantasy'),
+    GenreModel(id: 28, name: 'Action'),
+  ],
+  homepage: 'https://google.com',
+  id: 557,
+  imdbId: 'imdbId',
+  originalLanguage: 'en',
+  originalTitle: 'Spider-Man',
+  overview:
+      'After being bitten by a genetically altered spider, nerdy high school student Peter Parker is endowed with amazing powers to become the Amazing superhero known as Spider-Man.',
+  popularity: 60.441,
+  posterPath: '/rweIrveL43TaxUN0akQEaAXL6x0.jpg',
+  releaseDate: '2002-05-01',
+  revenue: 100,
+  runtime: 121,
+  status: 'Status',
+  tagline: 'tagline',
+  title: 'Spider-Man',
+  video: false,
+  voteAverage: 7.2,
+  voteCount: 13507,
 );
 
 final testWatchlistMovie = Movie.watchlist(

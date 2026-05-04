@@ -1,0 +1,24 @@
+{
+  "backdrop_path": "/img_path.jpg",
+  "first_air_date": "2000-10-10",
+  "genres": [
+    {
+      "id": 1,
+      "name": "Action"
+    }
+  ],
+  "id": 123,
+  "name": "movie_title",
+  "origin_country": [
+    "ID"
+  ],
+  "original_language": "id",
+  "original_name": "movie_title",
+  "overview": "lorem ipsum 123",
+  "popularity": 144,
+  "poster_path": "/poster_path.jpg",
+  "vote_average": 9.5,
+  "vote_count": 123,
+  "number_of_seasons": 1,
+  "number_of_episodes": 1
+}

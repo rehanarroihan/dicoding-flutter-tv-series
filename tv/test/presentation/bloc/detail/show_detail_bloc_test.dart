@@ -65,6 +65,13 @@ void main() {
     expect(showDetailBloc.state, ShowDetailState.initial());
   });
 
+  test('events support equatable props', () {
+    expect(const OnFetchShowDetail(1).props, [1]);
+    expect(const OnLoadShowWatchlistStatus(1).props, [1]);
+    expect(OnAddShowWatchlist(testShowDetail).props, [testShowDetail]);
+    expect(OnRemoveShowFromWatchlist(testShowDetail).props, [testShowDetail]);
+  });
+
   blocTest<ShowDetailBloc, ShowDetailState>(
     'Should emit [Loading, Loaded] when detail and recommendations are gotten successfully',
     build: () {
@@ -161,6 +168,33 @@ void main() {
   );
 
   blocTest<ShowDetailBloc, ShowDetailState>(
+    'Should emit [ShowDataState.error] when recommendations are gotten unsuccessfully',
+    build: () {
+      when(mockGetShowDetail.execute(tId))
+          .thenAnswer((_) async => Right(testShowDetail));
+      when(mockGetShowRecommendations.execute(tId))
+          .thenAnswer((_) async => Left(ServerFailure('Server Failure')));
+      return showDetailBloc;
+    },
+    act: (bloc) => bloc.add(OnFetchShowDetail(tId)),
+    expect: () => [
+      ShowDetailState.initial()
+          .copyWith(showDetailState: ShowDataState.loading),
+      ShowDetailState.initial().copyWith(
+        showDetailState: ShowDataState.loaded,
+        showDetail: testShowDetail,
+        showRecommendationsState: ShowDataState.loading,
+      ),
+      ShowDetailState.initial().copyWith(
+        showDetailState: ShowDataState.loaded,
+        showDetail: testShowDetail,
+        showRecommendationsState: ShowDataState.error,
+        message: 'Server Failure',
+      ),
+    ],
+  );
+
+  blocTest<ShowDetailBloc, ShowDetailState>(
     'Should emit watchlistMessage when remove watchlist is successful',
     build: () {
       when(mockRemoveFromWatchlist.execute(testShowDetail))
@@ -173,6 +207,25 @@ void main() {
     expect: () => [
       ShowDetailState.initial()
           .copyWith(watchlistMessage: 'Removed from Watchlist'),
+    ],
+  );
+
+  blocTest<ShowDetailBloc, ShowDetailState>(
+    'Should emit watchlistMessage when remove watchlist is unsuccessful',
+    build: () {
+      when(mockRemoveFromWatchlist.execute(testShowDetail))
+          .thenAnswer((_) async => Left(DatabaseFailure('Failed')));
+      when(mockGetShowWatchlistStatus.execute(testShowDetail.id))
+          .thenAnswer((_) async => true);
+      return showDetailBloc;
+    },
+    act: (bloc) => bloc.add(OnRemoveShowFromWatchlist(testShowDetail)),
+    expect: () => [
+      ShowDetailState.initial().copyWith(watchlistMessage: 'Failed'),
+      ShowDetailState.initial().copyWith(
+        watchlistMessage: 'Failed',
+        isAddedToWatchlist: true,
+      ),
     ],
   );
 }

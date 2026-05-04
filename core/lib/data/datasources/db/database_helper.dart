@@ -15,6 +15,14 @@ class DatabaseHelper {
 
   static Database? _database;
 
+  static Future<void> resetInstanceForTest({bool closeDatabase = true}) async {
+    if (closeDatabase && _database != null) {
+      await _database!.close();
+    }
+    _database = null;
+    _databaseHelper = null;
+  }
+
   Future<Database?> get database async {
     if (_database == null) {
       _database = await _initDb();

@@ -67,6 +67,13 @@ void main() {
     expect(movieDetailBloc.state, MovieDetailState.initial());
   });
 
+  test('events support equatable props', () {
+    expect(const OnFetchMovieDetail(1).props, [1]);
+    expect(const OnLoadWatchlistStatus(1).props, [1]);
+    expect(OnAddWatchlist(testMovieDetail).props, [testMovieDetail]);
+    expect(OnRemoveFromWatchlist(testMovieDetail).props, [testMovieDetail]);
+  });
+
   blocTest<MovieDetailBloc, MovieDetailState>(
     'Should emit [Loading, Loaded] when detail and recommendations are gotten successfully',
     build: () {
@@ -162,6 +169,33 @@ void main() {
   );
 
   blocTest<MovieDetailBloc, MovieDetailState>(
+    'Should emit [MovieDataState.error] when recommendations are gotten unsuccessfully',
+    build: () {
+      when(mockGetMovieDetail.execute(tId))
+          .thenAnswer((_) async => Right(testMovieDetail));
+      when(mockGetMovieRecommendations.execute(tId))
+          .thenAnswer((_) async => Left(ServerFailure('Server Failure')));
+      return movieDetailBloc;
+    },
+    act: (bloc) => bloc.add(OnFetchMovieDetail(tId)),
+    expect: () => [
+      MovieDetailState.initial()
+          .copyWith(movieDetailState: MovieDataState.loading),
+      MovieDetailState.initial().copyWith(
+        movieDetailState: MovieDataState.loaded,
+        movieDetail: testMovieDetail,
+        movieRecommendationsState: MovieDataState.loading,
+      ),
+      MovieDetailState.initial().copyWith(
+        movieDetailState: MovieDataState.loaded,
+        movieDetail: testMovieDetail,
+        movieRecommendationsState: MovieDataState.error,
+        message: 'Server Failure',
+      ),
+    ],
+  );
+
+  blocTest<MovieDetailBloc, MovieDetailState>(
     'Should emit watchlistMessage when remove watchlist is successful',
     build: () {
       when(mockRemoveWatchlist.execute(testMovieDetail))
@@ -174,6 +208,25 @@ void main() {
     expect: () => [
       MovieDetailState.initial()
           .copyWith(watchlistMessage: 'Removed from Watchlist'),
+    ],
+  );
+
+  blocTest<MovieDetailBloc, MovieDetailState>(
+    'Should emit watchlistMessage when remove watchlist is unsuccessful',
+    build: () {
+      when(mockRemoveWatchlist.execute(testMovieDetail))
+          .thenAnswer((_) async => Left(DatabaseFailure('Failed')));
+      when(mockGetWatchListStatus.execute(testMovieDetail.id))
+          .thenAnswer((_) async => true);
+      return movieDetailBloc;
+    },
+    act: (bloc) => bloc.add(OnRemoveFromWatchlist(testMovieDetail)),
+    expect: () => [
+      MovieDetailState.initial().copyWith(watchlistMessage: 'Failed'),
+      MovieDetailState.initial().copyWith(
+        watchlistMessage: 'Failed',
+        isAddedToWatchlist: true,
+      ),
     ],
   );
 }

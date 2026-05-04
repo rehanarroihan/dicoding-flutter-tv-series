@@ -49,7 +49,7 @@ class MovieDetailResponse extends Equatable {
   final double voteAverage;
   final int voteCount;
 
-  factory MovieDetailResponse.fromJson(Map<String, dynamic> json) =>
+  factory MovieDetailResponse.fromMap(Map<String, dynamic> json) =>
       MovieDetailResponse(
         adult: json['adult'],
         backdropPath: json['backdrop_path'],

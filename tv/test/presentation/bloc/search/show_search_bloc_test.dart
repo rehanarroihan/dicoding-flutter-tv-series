@@ -3,6 +3,7 @@ import 'package:core/common/failure.dart';
 import 'package:core/domain/entities/tv_show.dart';
 import 'package:core/domain/usecases/search_shows.dart';
 import 'package:dartz/dartz.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
@@ -39,6 +40,22 @@ void main() {
 
   test('initial state should be empty', () {
     expect(showSearchBloc.state, ShowSearchEmpty());
+  });
+
+  test('event and states support equatable props', () {
+    expect(const OnShowSearchQueryChanged('q').props, ['q']);
+    expect(const ShowSearchError('m').props, ['m']);
+    expect(const ShowSearchHasData([]).props, [
+      const <TvShow>[],
+    ]);
+    expect(ShowSearchLoading().props, []);
+    expect(ShowSearchEmpty().props, []);
+  });
+
+  test('debounce returns an EventTransformer', () {
+    final transformer =
+        showSearchBloc.debounce<OnShowSearchQueryChanged>(Duration.zero);
+    expect(transformer, isA<EventTransformer<OnShowSearchQueryChanged>>());
   });
 
   blocTest<ShowSearchBloc, ShowSearchState>(

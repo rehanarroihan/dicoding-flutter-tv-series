@@ -46,7 +46,7 @@ class MovieRemoteDataSourceImpl implements MovieRemoteDataSource {
         await client.get(Uri.parse('$BASE_URL/movie/$id?api_key=$API_KEY'));
 
     if (response.statusCode == 200) {
-      return MovieDetailResponse.fromJson(json.decode(response.body));
+      return MovieDetailResponse.fromMap(json.decode(response.body));
     } else {
       throw ServerException();
     }

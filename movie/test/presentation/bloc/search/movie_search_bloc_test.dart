@@ -3,6 +3,7 @@ import 'package:core/common/failure.dart';
 import 'package:core/domain/entities/movie.dart';
 import 'package:core/domain/usecases/search_movies.dart';
 import 'package:dartz/dartz.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
@@ -43,6 +44,22 @@ void main() {
     expect(movieSearchBloc.state, MovieSearchEmpty());
   });
 
+  test('event and states support equatable props', () {
+    expect(const OnMovieSearchQueryChanged('q').props, ['q']);
+    expect(const MovieSearchError('m').props, ['m']);
+    expect(const MovieSearchHasData([]).props, [
+      const <Movie>[],
+    ]);
+    expect(MovieSearchLoading().props, []);
+    expect(MovieSearchEmpty().props, []);
+  });
+
+  test('debounce returns an EventTransformer', () {
+    final transformer =
+        movieSearchBloc.debounce<OnMovieSearchQueryChanged>(Duration.zero);
+    expect(transformer, isA<EventTransformer<OnMovieSearchQueryChanged>>());
+  });
+
   blocTest<MovieSearchBloc, MovieSearchState>(
     'Should emit [Loading, HasData] when data is gotten successfully',
     build: () {
@@ -77,5 +94,20 @@ void main() {
     verify: (bloc) {
       verify(mockSearchMovies.execute(tQuery));
     },
+  );
+
+  blocTest<MovieSearchBloc, MovieSearchState>(
+    'Should emit [Loading, Empty] when data is empty',
+    build: () {
+      when(mockSearchMovies.execute(tQuery))
+          .thenAnswer((_) async => const Right([]));
+      return movieSearchBloc;
+    },
+    act: (bloc) => bloc.add(OnMovieSearchQueryChanged(tQuery)),
+    wait: const Duration(milliseconds: 500),
+    expect: () => [
+      MovieSearchLoading(),
+      const MovieSearchHasData([]),
+    ],
   );
 }
