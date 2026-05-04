@@ -1,10 +1,10 @@
 import 'package:ditonton/data/models/movie_table.dart';
-import 'package:ditonton/data/models/tv_series_table.dart';
+import 'package:ditonton/data/models/tv_show_table.dart';
 import 'package:ditonton/domain/entities/genre.dart';
 import 'package:ditonton/domain/entities/movie.dart';
 import 'package:ditonton/domain/entities/movie_detail.dart';
-import 'package:ditonton/domain/entities/tv_series.dart';
-import 'package:ditonton/domain/entities/tv_series_detail.dart';
+import 'package:ditonton/domain/entities/tv_show.dart';
+import 'package:ditonton/domain/entities/tv_show_detail.dart';
 
 final testMovie = Movie(
   adult: false,
@@ -61,53 +61,58 @@ final testMovieMap = {
   'title': 'title',
 };
 
-final testTvSeriesDetail = TvSeriesDetail(
-  genres: [Genre(id: 1, name: 'Action')],
-  id: 66732,
-  name: 'Stranger Things',
-  numberOfEpisodes: 34,
-  numberOfSeasons: 4,
-  overview: 'Stranger Things',
-  posterPath: '/49WJfeN0moxb9IPfGn8AIqMGskD.jpg',
-  voteAverage: 8.6,
-);
-
-final testTvSeries = TvSeries(
-  name: 'fdsfas',
-  firstAirDate: '123',
-  backdropPath: '/muth4OYamXf41G2evdrLEg8d3om.jpg',
-  genreIds: [14, 28],
-  id: 557,
+// TV SHOWS
+final testShowDetail = TvShowDetail(
+  genres: [Genre(id: 1, name: 'Drama')],
+  id: 1399,
+  name: 'Game of Thrones',
+  episodeCount: 73,
+  seasonCount: 8,
   overview:
-      'After being bitten by a genetically altered spider, nerdy high school student Peter Parker is endowed with amazing powers to become the Amazing superhero known as Spider-Man.',
-  popularity: 60.441,
-  posterPath: '/rweIrveL43TaxUN0akQEaAXL6x0.jpg',
-  originCountry: ['213', '33'],
-  originalLanguage: 'ID',
-  originalName: 'fdfasda',
-  voteAverage: 7.2,
-  voteCount: 13507,
+      'Seven noble families fight for control of the mythical land of Westeros.',
+  posterPath: '/gwPSoYmZRHFO6Bs9AdqS0Y7Y0rs.jpg',
+  rating: 8.3,
 );
 
-final testTvSeriesList = [testTvSeries];
-
-final testTvSeriesTable = TvSeriesTable(
-  id: 111,
-  name: 'the last of ...',
-  posterPath: 'gambar.jpg',
-  overview: 'bagus',
+final testShow = TvShow(
+  name: 'Game of Thrones',
+  airDate: '2011-04-17',
+  backdropPath: '/suPo9j1B7exIuUfHgsn9sbrvP9i.jpg',
+  genreIds: [10765, 18, 10759],
+  id: 1399,
+  overview:
+      'Seven noble families fight for control of the mythical land of Westeros.',
+  popularity: 369.594,
+  posterPath: '/gwPSoYmZRHFO6Bs9AdqS0Y7Y0rs.jpg',
+  countries: ['US'],
+  originalLanguage: 'en',
+  originalName: 'Game of Thrones',
+  rating: 8.3,
+  ratingCount: 11500,
 );
 
-final testTvSeriesMap = {
-  'id': 111,
-  'overview': 'bagus',
-  'posterPath': 'gambar.jpg',
-  'title': 'the last of ...',
+final testShowList = [testShow];
+
+final testShowTable = TvShowTable(
+  id: 1399,
+  name: 'Game of Thrones',
+  posterPath: '/gwPSoYmZRHFO6Bs9AdqS0Y7Y0rs.jpg',
+  overview:
+      'Seven noble families fight for control of the mythical land of Westeros.',
+);
+
+final testShowMap = {
+  'id': 1399,
+  'overview':
+      'Seven noble families fight for control of the mythical land of Westeros.',
+  'posterPath': '/gwPSoYmZRHFO6Bs9AdqS0Y7Y0rs.jpg',
+  'title': 'Game of Thrones',
 };
 
-final testWatchlistTvSeries = TvSeries.watchlist(
-  id: 111,
-  name: 'the last of ...',
-  posterPath: 'gambar.jpg',
-  overview: 'bagus',
+final testWatchlistShow = TvShow.watchlist(
+  id: 1399,
+  name: 'Game of Thrones',
+  posterPath: '/gwPSoYmZRHFO6Bs9AdqS0Y7Y0rs.jpg',
+  overview:
+      'Seven noble families fight for control of the mythical land of Westeros.',
 );

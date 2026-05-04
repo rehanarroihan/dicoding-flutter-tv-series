@@ -1,9 +1,9 @@
 import 'package:ditonton/common/constants.dart';
 import 'package:ditonton/common/state_enum.dart';
 import 'package:ditonton/presentation/provider/movie_search_notifier.dart';
-import 'package:ditonton/presentation/provider/search_tv_series_notifier.dart';
+import 'package:ditonton/presentation/provider/show_search_notifier.dart';
 import 'package:ditonton/presentation/widgets/movie_card_list.dart';
-import 'package:ditonton/presentation/widgets/tv_series_card.dart';
+import 'package:ditonton/presentation/widgets/show_card.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -18,7 +18,7 @@ class SearchPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Search ${isMovie ? 'Movie' : 'TV Series'}'),
+        title: Text('Search ${isMovie ? 'Movie' : 'TV Show'}'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -27,13 +27,13 @@ class SearchPage extends StatelessWidget {
           children: [
             TextField(
               onSubmitted: (query) {
-                isMovie
-                    ? Provider.of<MovieSearchNotifier>(context, listen: false)
-                        .fetchMovieSearch(query)
-                    : Provider.of<SearchTvSeriesNotifier>(
-                        context,
-                        listen: false,
-                      ).fetchTvSeriesSearch(query);
+                if (isMovie) {
+                  Provider.of<MovieSearchNotifier>(context, listen: false)
+                      .fetchMovieSearch(query);
+                } else {
+                  Provider.of<ShowSearchNotifier>(context, listen: false)
+                      .executeSearch(query);
+                }
               },
               decoration: const InputDecoration(
                 hintText: 'Search title',
@@ -51,9 +51,7 @@ class SearchPage extends StatelessWidget {
                 ? Consumer<MovieSearchNotifier>(
                     builder: (context, data, child) {
                       if (data.state == RequestState.Loading) {
-                        return const Center(
-                          child: CircularProgressIndicator(),
-                        );
+                        return const Center(child: CircularProgressIndicator());
                       } else if (data.state == RequestState.Loaded) {
                         final result = data.searchResult;
                         return Expanded(
@@ -67,34 +65,28 @@ class SearchPage extends StatelessWidget {
                           ),
                         );
                       } else {
-                        return Expanded(
-                          child: Container(),
-                        );
+                        return Expanded(child: Container());
                       }
                     },
                   )
-                : Consumer<SearchTvSeriesNotifier>(
+                : Consumer<ShowSearchNotifier>(
                     builder: (context, data, child) {
-                      if (data.state == RequestState.Loading) {
-                        return const Center(
-                          child: CircularProgressIndicator(),
-                        );
-                      } else if (data.state == RequestState.Loaded) {
-                        final result = data.searchResult;
+                      if (data.searchStatus == RequestState.Loading) {
+                        return const Center(child: CircularProgressIndicator());
+                      } else if (data.searchStatus == RequestState.Loaded) {
+                        final result = data.results;
                         return Expanded(
                           child: ListView.builder(
                             padding: const EdgeInsets.all(8),
                             itemBuilder: (context, index) {
-                              final movie = data.searchResult[index];
-                              return TvSeriesCard(movie);
+                              final item = data.results[index];
+                              return ShowCard(item);
                             },
                             itemCount: result.length,
                           ),
                         );
                       } else {
-                        return Expanded(
-                          child: Container(),
-                        );
+                        return Expanded(child: Container());
                       }
                     },
                   ),
