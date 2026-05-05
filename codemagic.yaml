@@ -1,0 +1,20 @@
+workflows:
+  flutter-multimodule-test:
+    name: Flutter Multi-Module Tests
+    max_build_duration: 60
+    environment:
+      flutter: stable
+
+    scripts:
+      - name: Install lcov
+        script: |
+          sudo apt-get update -y
+          sudo apt-get install -y lcov
+
+      - name: Run multi-module tests
+        script: |
+          chmod +x test.sh
+          bash test.sh
+
+    artifacts:
+      - coverage/
