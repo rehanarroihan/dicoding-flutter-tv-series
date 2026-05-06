@@ -2,7 +2,6 @@ import 'package:core/data/datasources/db/database_helper.dart';
 import 'package:core/data/models/movie_table.dart';
 import 'package:core/data/models/tv_show_table.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 void main() {

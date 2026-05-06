@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:about/about.dart';
 import 'package:core/core.dart';
 import 'package:ditonton/injection.dart' as di;
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/cupertino.dart';
@@ -19,6 +20,7 @@ Future<void> main() async {
     di.init();
 
     await Firebase.initializeApp();
+    await FirebaseAnalytics.instance.logAppOpen();
 
     FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
     PlatformDispatcher.instance.onError = (error, stack) {
@@ -28,6 +30,7 @@ Future<void> main() async {
 
     if (kDebugMode) {
       await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(true);
+      await FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(true);
     }
 
     runApp(MyApp());
@@ -37,6 +40,12 @@ Future<void> main() async {
 }
 
 class MyApp extends StatelessWidget {
+  MyApp({super.key});
+
+  final FirebaseAnalytics _analytics = FirebaseAnalytics.instance;
+  late final FirebaseAnalyticsObserver _analyticsObserver =
+      FirebaseAnalyticsObserver(analytics: _analytics);
+
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
@@ -64,7 +73,7 @@ class MyApp extends StatelessWidget {
           drawerTheme: kDrawerTheme,
         ),
         home: HomeMoviePage(),
-        navigatorObservers: [routeObserver],
+        navigatorObservers: [routeObserver, _analyticsObserver],
         onGenerateRoute: (RouteSettings settings) {
           switch (settings.name) {
             case HomeMoviePage.ROUTE_NAME:
