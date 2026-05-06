@@ -1,0 +1,17 @@
+name: ditonton_workspace
+packages:
+  - .
+  - core
+  - movie
+  - tv
+  - about
+
+command:
+  bootstrap:
+    usePubspecOverrides: true
+
+scripts:
+  test:
+    run: melos exec --concurrency=1 --fail-fast --dir-exists=test -- "sh -c 'if find test -name \"*_test.dart\" -print -quit | grep -q .; then flutter test; else echo \"No tests, skipping\"; fi'"
+  test:machine:
+    run: melos exec --concurrency=1 --fail-fast --dir-exists=test -- "sh -c 'if find test -name \"*_test.dart\" -print -quit | grep -q .; then flutter test --machine; else echo \"No tests, skipping\"; fi'"
